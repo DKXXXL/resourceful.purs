@@ -4,47 +4,23 @@ module Resouceful
 
 
 import HTMLgenerator(htmlGenerator0)
-import RCommand(RCommand, commandAnl)
+import RCommand(RCommand(Dir), commandAnlA,ptclpartition,argpartition,commandBckA)
 newtype Path = String
 
-ptclpartition = "|||"
 
-parser1' :: String -> [String]
-parser1' str = split str ptclpartition
-parser2 :: String -> [String]
-parser2 str = split str argpartition
-  where argpartition = ","
-        
-parser3 :: [String] -> RCommand
-parser3 = commandAnl
+--liftM' :: (a -> b) -> (forall e. Eff e a) -> (forall e. Eff e b)
+liftM' f m = m `bind` (return . f)
 
-runCommand :: RCommand -> Maybe String
-runCommand = undefined
-
-commandReturn' :: Maybe String -> Maybe String
-commandReturn' x = x >>= (\y -> return $ commandReturn y)
-
-commandReturn :: String -> String
-commandReturn tpath str = htmlGenerator0  tpath (split str ptclpartition)
-
-resourcefulMain :: String -> String
-resourcefulMain = demaybe .
-                  (foldr retUnino Nothing) .
-                  (map $ commandReturn' . runCommand . parser3 . parser2 ) .
-                  parser1'
-  where retUnino _ (Just y) = Just y
+resourcefulMain :: String ->Eff STORAGE String
+resourcefulMain = liftM' (demaybe . (foldr retUnino Nothing)) .
+                  commandAnlA .
+                  antiBlank'
+  where retUnino _ (Just y) = y
         retUnino x' Nothing = x'
         demaybe (Just x) = x
-        demaybe Nothing = ""
+        demaybe Nothing = []
+        antiBlank' x = if x == []
+                       then commandBckA (Dir "/")
+                       else x
 
-
-split x y = case (find' x y) of (a , []) -> a : []
-                                (a , b)  -> a : (find b y)
-  where find'  (_:x')@x y = if(length(y) > length (x))
-                            then (x , []) 
-                            else if (y `isPrefixof` x)
-                                 then (y, prefixof x (length y))
-                                 else find' x' y
-        prefixof x 0 = x
-        prefixof (_:x') n = prefixof x' (n - 1)
 
