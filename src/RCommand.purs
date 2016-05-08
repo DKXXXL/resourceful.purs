@@ -2,6 +2,10 @@ module RCommand
        (argpartition,ptclpartition,RCommand, commandAnl, commandBck, commandBckA)
        where
 
+import Control.Monad.Eff
+import Data.Maybe
+import RCommandOp (rcOp)
+
 ptclpartition = "&"
 argpartition = ","
 
@@ -10,17 +14,17 @@ data RCommand = Dir Path
               | Mkdir Path
               | Remove Path
               | Move {from :: Path, to :: Path}
-              | Rename {from :: Path, to :: Path}
+--              | Rename {from :: Path, to :: Path}
               | ErrorC
 
 
-commandAnl :: [String] -> RCommand              
+commandAnl :: [[Char]] -> RCommand              
 commandAnl ("dir":x:[]) = Dir x
 commandAnl ("copy":x:y:[]) = Copy x y
 commandAnl ("mkdir":x:[]) = Mkdir x
 commandAnl ("remove":x:[]) = Remove x
 commandAnl ("move":x:y:[]) = Move x y
-commandAnl ("rename":x:y:[]) = Remove x y
+--commandAnl ("rename":x:y:[]) = Remove x y
 commandAnl _ = ErrorC
 
 
@@ -63,8 +67,17 @@ parser3 = commandAnl
 
 
 runCommand :: RCommand -> Eff STORAGE (Maybe String)
-runCommand = undefined
-
+runCommand (Dir x) = rcOp (getrootfile x) "dir" (x:[])
+runCommand (Copy x y) = rcOp (getrootfile x) "copy" (x:y:[])
+runCommand (Mkdir x) = rcOp (getrootfile x) "mkdir" (x:[])
+runCommand (Remove x) = rcOp (getrootfile x) "remove" (x:[])
+runCommand (Move x y) = rcOp (getrootfile x) "move" (x:y:[])
+  where getrootfile x = find'' '/' x []
+        find'' :: Char -> String -> String -> String
+        find'' x (x:t) ret = reverse ret []
+        find'' x (y:t) ret = find'' x t (y:ret)
+        reverse (x:y) z = reverse y (x:z)
+        reverse [] y = y
 commandReturn' :: Eff STORAGE (Maybe String) -> EFF STORAGE (Maybe String)
 commandReturn' x = x `bind` (\y -> return $ commandReturn'' y)
 
