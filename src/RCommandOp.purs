@@ -1,11 +1,9 @@
-module RCommandOp (rcOp) where
+module RCommandOp (rcOpf,STORAGE) where
+
 
 import Control.Monad.Eff
+--import Control.Monad.Eff.Storage (STORAGE)
 
-foreign import rcOpf :: String -> String ->  forall e. Eff (STORAGE | e) String  
+foreign import data STORAGE :: !
 
-rcOp :: String -> String -> [String] -> forall e. Eff (STORAGE | e) String
-rcOp rootfile funcname funcargvs = rcOpf rootfile (call' funcname funcargvs)
-  where call' funcname funcargvs = funcname ++ ('(' : (call'' funcargvs))
-        call'' (x : []) = x ++ ")"
-        call'' (x : y) = x ++ (',' ++ (call'' y))
+foreign import rcOpf :: String -> String ->  forall e. Eff (storage :: STORAGE | e) String  

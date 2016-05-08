@@ -1,4 +1,4 @@
-module Resouceful
+module Resourceful
        (resourcefulMain)
        where
 
@@ -10,11 +10,16 @@ newtype Path = String
 
 
 --liftM' :: (a -> b) -> (forall e. Eff e a) -> (forall e. Eff e b)
-liftM' f m = m `bind` (return . f)
+liftM' f m = m `bind` (return `fc` f)
+
+
+fc :: forall a b c d. (b -> c) -> (a -> b) -> (a -> c)
+fc f g = \x -> (f (g x))
+
 
 resourcefulMain :: String ->Eff STORAGE String
-resourcefulMain = (liftM' (demaybe . (foldl'' retUnino Nothing))) .
-                  commandAnlA .
+resourcefulMain = (liftM' (demaybe `fc` (foldl'' retUnino Nothing))) `fc`
+                  commandAnlA `fc`
                   antiBlank'
   where retUnino _ (Just y) = y
         retUnino x' Nothing = x'

@@ -11,7 +11,7 @@ data Tree a = Node {node :: a, ltree :: (Tree a) , rtree :: (Tree a)} | Null
 type PropertyType = String 
 type PropertyContent = String
 data HTMLProperty = HTMLproperty {ptype :: PropertyType, pcontent :: PropertyContent}
-type Properties = [HTMLProperty]
+type Properties = Array HTMLProperty
 
 type HTMLElementType = String
                      
@@ -29,19 +29,19 @@ htmlElementPrint (HTMLelement etype properties text) sub peer =
   (htmlETypePrint etype) (htmlPPrint properties) sub peer
 
 htmlPPrint :: Properties -> String
-htmlPPrint (HTMLproperty ptype pcontent):next = 
+htmlPPrint ((HTMLproperty ptype pcontent):next) = 
   ptype ++ "=" ++ "\""  ++ pcontent ++ "\"" ++ (" " ++ (htmlPPrint next))
 htmlPPrint [] = ""
   
 htmlETypePrint ::HTMLElementType -> String -> String -> String ->String
 htmlETypePrint etype plist sub peer = "<" ++ (etypePrint etype) ++ " " ++ plist ++ ">"
                                       ++ sub
-                                      ++ "<" ++ (anti-etypePrint etype) ++ ">"
+                                      ++ "<" ++ (antietypePrint etype) ++ ">"
                                       ++ peer
   where etypePrint :: HTMLElementType -> String
         etypePrint x = x
-        anti-etypePrint :: HTMLElementType -> String
-        anti-etypePrint x = '/':(etypePrint x)
+        antietypePrint :: HTMLElementType -> String
+        antietypePrint x = '/':(etypePrint x)
 --The Generator
 
 
@@ -63,7 +63,7 @@ htmlCombine
   where peerCombine (Node n c Null) x = Node n c x
         peerCombine (Node n c l) x = Node n c (peerCombine l x) 
 
-htmlGenerator1 :: String -> [String] -> HTMLContent
+htmlGenerator1 :: String -> Array String -> HTMLContent
 htmlGenerator1 x y = htmlInit "" (\(Node x _ _) -> (Node x (htmlGenerator1' x y) Null)) 
   where htmlGenerator1'  _ [] = Null
         htmlGenerator1'  now_path (x:dir) = Node x' checkbox $ htmlGenerator1' dir
@@ -76,5 +76,5 @@ htmlGenerator1 x y = htmlInit "" (\(Node x _ _) -> (Node x (htmlGenerator1' x y)
                             ""
                 a = HTMLelement "a" [HTMLproperty "href" (cmdGenerator "dir" ((now_path ++ x):[]))] x
                 
-htmlGenerator2 :: [RCommand] -> HTMLContent
+htmlGenerator2 :: Array RCommand -> HTMLContent
 --htmlGenerator2 ahrefs = 

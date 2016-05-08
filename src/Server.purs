@@ -1,3 +1,3 @@
 module Server where
 
-foreign import ServerStart :: Int ->(String -> String) -> Int
+foreign import serverStart :: Int ->(String -> String) -> Int

@@ -3,13 +3,13 @@
 // module Server
 
 
-exports.ServerStart = ServerStart
+exports.serverStart = serverStart
 
 
 var http = require('http');
 var url = require('url');
 var util = require('util');
-function ServerStart(port, f)
+function serverStart(port, f)
 {
     http.createServer(function (request, response){
 	
